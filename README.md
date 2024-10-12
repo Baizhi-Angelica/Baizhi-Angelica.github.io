@@ -6,4 +6,4 @@
 Here is my resume, please feel free to contact me if there's any chance of interview in Suzhou or Shanghai.
 
 ---
-`This website is still under construction, please allow some low performance :) I don't understand how to build a good blog. Thx`
+`This website is still under construction, please allow some low performance :) I am still learning how to build a good blog. Thx`
