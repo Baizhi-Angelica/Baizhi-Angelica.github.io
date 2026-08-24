@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "vitest run"
+    "test": "vitest run",
+    "photos": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
     "astro": "^7.2.4",
@@ -16,6 +17,7 @@
     "rehype-stringify": "^10.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
+    "sharp": "^0.35.3",
     "unified": "^11.0.5"
   },
   "devDependencies": {

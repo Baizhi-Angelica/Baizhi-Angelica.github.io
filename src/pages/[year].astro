@@ -35,7 +35,17 @@ let postIndex = 0;
   />
 
   <main id="main-content" class="journal-shell">
-    <h1 class="year-title"><span>{selectedYear.year}</span> / TIME LOG</h1>
+    <h1 class="year-title">
+      <span class="year-primary">
+        <span class="year-number">{selectedYear.year}</span>
+        <span
+          class="photo-data-warning"
+          role="note"
+          title="本页包含多张高质量照片，使用移动数据时请留意流量。"
+        >多图杀猫预警</span>
+      </span>
+      <span class="year-subtitle">/ TIME LOG</span>
+    </h1>
 
     {selectedYear.months.map((month) => (
       <section class="month-section" aria-labelledby={`${month.id}-label`}>
@@ -57,4 +67,3 @@ let postIndex = 0;
     <span>END OF VOLUME</span>
   </footer>
 </BaseLayout>
-
