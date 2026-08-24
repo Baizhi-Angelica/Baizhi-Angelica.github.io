@@ -1,0 +1,60 @@
+---
+import type { JournalPost } from '../lib/journal';
+
+interface Props {
+  post: JournalPost;
+  isFirst?: boolean;
+}
+
+const { post, isFirst = false } = Astro.props;
+const displayDate = post.isoDate.replaceAll('-', '.');
+const pairColumns = post.images
+  .map((image) => {
+    if (!image.width || !image.height) return 1;
+    return Math.max(0.72, Math.min(1.55, image.width / image.height));
+  })
+  .map((ratio) => `${ratio}fr`)
+  .join(' ');
+---
+
+<article class:list={['journal-post', { 'journal-post--text': post.images.length === 0 }]} id={post.isoDate}>
+  <header class="post-date">
+    <a href={`#${post.isoDate}`} aria-label={`链接到 ${post.isoDate} 的日志`}>{displayDate}</a>
+  </header>
+
+  <div class="post-opening">
+    {post.images.length > 0 && (
+      <div
+        class:list={['post-media', `post-media--${post.images.length}`]}
+        style={post.images.length === 2 ? `--pair-columns: ${pairColumns}` : undefined}
+      >
+        {post.images.map((image, imageIndex) => (
+          <a
+            class="post-image-link"
+            href={image.src}
+            data-lightbox-image
+            data-lightbox-alt={image.alt}
+            aria-label={`查看大图：${image.alt || post.isoDate}`}
+          >
+            <figure class:list={['post-image', `post-image--${image.orientation ?? 'unknown'}`]}>
+              <img
+                src={image.src}
+                alt={image.alt}
+                title={image.title ?? undefined}
+                width={image.width}
+                height={image.height}
+                loading={isFirst && imageIndex === 0 ? 'eager' : 'lazy'}
+                fetchpriority={isFirst && imageIndex === 0 ? 'high' : 'auto'}
+                decoding="async"
+              />
+            </figure>
+          </a>
+        ))}
+      </div>
+    )}
+
+    {post.leadHtml && <div class="post-lead prose" set:html={post.leadHtml} />}
+  </div>
+
+  {post.bodyHtml && <div class="post-body prose" set:html={post.bodyHtml} />}
+</article>

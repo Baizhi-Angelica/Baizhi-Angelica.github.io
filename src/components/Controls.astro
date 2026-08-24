@@ -1,0 +1,51 @@
+---
+interface Props {
+  years: number[];
+  currentYear?: number;
+  months?: Array<{ month: number; id: string }>;
+}
+
+const { years, currentYear, months = [] } = Astro.props;
+const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const currentMonth = months[0]?.month;
+---
+
+<nav class="controls" aria-label="日志导航与显示设置">
+  <details class="control-menu year-menu">
+    <summary aria-label="选择年份">{currentYear ?? 'YEAR'}</summary>
+    <div class="menu-panel" aria-label="可用年份">
+      {years.map((year) => (
+        <a href={`/${year}/`} aria-current={year === currentYear ? 'page' : undefined}>{year}</a>
+      ))}
+    </div>
+  </details>
+
+  {currentYear && months.length > 0 && (
+    <details class="control-menu month-menu">
+      <summary aria-label="跳到月份">{currentMonth ? monthNames[currentMonth - 1] : 'MONTH'}</summary>
+      <div class="menu-panel" aria-label={`${currentYear} 年有内容的月份`}>
+        {months.map(({ month, id }) => <a href={`#${id}`}>{monthNames[month - 1]}</a>)}
+      </div>
+    </details>
+  )}
+
+  <a class="control-button info-button" href="/about/" aria-label="关于我">i</a>
+  <button class="control-button theme-button" type="button" aria-label="切换明暗主题">
+    <span aria-hidden="true"></span>
+  </button>
+</nav>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('.theme-button');
+  button?.addEventListener('click', () => {
+    const current = document.documentElement.dataset.theme;
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try {
+      localStorage.setItem('journal-theme', next);
+    } catch {
+      // The theme still changes for this page when storage is unavailable.
+    }
+  });
+</script>
+

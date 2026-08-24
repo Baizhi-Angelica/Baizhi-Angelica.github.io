@@ -1,0 +1,21 @@
+---
+import Controls from '../components/Controls.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { loadAbout, loadJournal } from '../lib/journal';
+
+const [aboutHtml, journal] = await Promise.all([loadAbout(), loadJournal()]);
+---
+
+<BaseLayout title="About — Angelica's Photographic Journal" description="关于这本个人摄影时间日志。">
+  <header class="site-mark">
+    <p>ANGELICA</p>
+    <p>PHOTOGRAPHIC JOURNAL</p>
+  </header>
+  <Controls years={journal.years.map((year) => year.year)} />
+
+  <main id="main-content" class="about-shell">
+    <div class="about-kicker">INFORMATION / 信息</div>
+    <article class="about-content prose" set:html={aboutHtml} />
+    <a class="return-link" href={`/${journal.latestYear}/`}>← 返回最新日志</a>
+  </main>
+</BaseLayout>

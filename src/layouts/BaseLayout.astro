@@ -1,0 +1,92 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  redirectTo?: string;
+}
+
+const { title, description, canonicalPath = Astro.url.pathname, redirectTo } = Astro.props;
+const canonical = new URL(canonicalPath, Astro.site);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f2efe8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1d1d1a" media="(prefers-color-scheme: dark)" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="zh_CN" />
+    {redirectTo && <meta http-equiv="refresh" content={`0;url=${redirectTo}`} />}
+    <title>{title}</title>
+    <script is:inline>
+      (() => {
+        try {
+          const saved = localStorage.getItem('journal-theme');
+          const preferred = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          document.documentElement.dataset.theme = saved === 'light' || saved === 'dark' ? saved : preferred;
+        } catch {
+          document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <slot />
+    <dialog class="lightbox" aria-label="照片大图查看">
+      <div class="lightbox-frame">
+        <img src="" alt="" />
+        <p class="lightbox-caption"></p>
+        <button class="lightbox-close" type="button" aria-label="关闭大图">关闭</button>
+      </div>
+    </dialog>
+    <script is:inline>
+      (() => {
+        const dialog = document.querySelector('.lightbox');
+        const fullImage = dialog?.querySelector('img');
+        const caption = dialog?.querySelector('.lightbox-caption');
+        const closeButton = dialog?.querySelector('.lightbox-close');
+        let opener;
+
+        if (!(dialog instanceof HTMLDialogElement) || !(fullImage instanceof HTMLImageElement)) return;
+
+        document.addEventListener('click', (event) => {
+          const link = event.target.closest?.('[data-lightbox-image]');
+          if (!(link instanceof HTMLAnchorElement)) return;
+
+          event.preventDefault();
+          opener = link;
+          fullImage.src = link.href;
+          fullImage.alt = link.dataset.lightboxAlt || '';
+          if (caption) {
+            caption.textContent = fullImage.alt;
+            caption.hidden = !fullImage.alt;
+          }
+          dialog.showModal();
+          closeButton?.focus();
+        });
+
+        const close = () => dialog.close();
+        closeButton?.addEventListener('click', close);
+        dialog.addEventListener('click', (event) => {
+          if (event.target === dialog) close();
+        });
+        dialog.addEventListener('close', () => {
+          fullImage.removeAttribute('src');
+          opener?.focus();
+        });
+      })();
+    </script>
+  </body>
+</html>

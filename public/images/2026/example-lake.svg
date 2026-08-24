@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">示例照片占位图</title>
+  <desc id="desc">湖面与远山的抽象色块，仅用于展示版面。</desc>
+  <rect width="1600" height="1000" fill="#c9c8c2"/>
+  <rect y="610" width="1600" height="390" fill="#838c8b"/>
+  <path d="M0 650 310 420 535 570 790 335 1080 585 1310 390 1600 620V760H0Z" fill="#5d6564"/>
+  <path d="M0 715Q400 650 800 725T1600 700V1000H0Z" fill="#aeb7b4" opacity=".72"/>
+  <text x="72" y="90" fill="#343b3b" font-family="system-ui,sans-serif" font-size="27" letter-spacing="5">EXAMPLE PHOTOGRAPH</text>
+</svg>
+

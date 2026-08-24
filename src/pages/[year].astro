@@ -1,0 +1,60 @@
+---
+import Controls from '../components/Controls.astro';
+import Post from '../components/Post.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { loadJournal, type JournalYear } from '../lib/journal';
+
+export async function getStaticPaths() {
+  const journal = await loadJournal();
+  return journal.years.map((year) => ({
+    params: { year: String(year.year) },
+    props: { selectedYear: year, allYears: journal.years.map((item) => item.year) }
+  }));
+}
+
+interface Props {
+  selectedYear: JournalYear;
+  allYears: number[];
+}
+
+const { selectedYear, allYears } = Astro.props;
+const description = `${selectedYear.year} 年个人摄影时间日志，按日期从新到旧排列。`;
+let postIndex = 0;
+---
+
+<BaseLayout title={`${selectedYear.year} — Angelica's Photographic Journal`} description={description}>
+  <header class="site-mark">
+    <p>ANGELICA</p>
+    <p>PHOTOGRAPHIC JOURNAL</p>
+  </header>
+
+  <Controls
+    years={allYears}
+    currentYear={selectedYear.year}
+    months={selectedYear.months.map(({ month, id }) => ({ month, id }))}
+  />
+
+  <main id="main-content" class="journal-shell">
+    <h1 class="year-title"><span>{selectedYear.year}</span> / TIME LOG</h1>
+
+    {selectedYear.months.map((month) => (
+      <section class="month-section" aria-labelledby={`${month.id}-label`}>
+        <h2 class="month-label" id={month.id}>
+          <span id={`${month.id}-label`}>{new Intl.DateTimeFormat('en', { month: 'long' }).format(new Date(Date.UTC(2020, month.month - 1, 1)))}</span>
+          <span>{String(month.month).padStart(2, '0')}</span>
+        </h2>
+        {month.posts.map((post) => {
+          const currentIndex = postIndex;
+          postIndex += 1;
+          return <Post post={post} isFirst={currentIndex === 0} />;
+        })}
+      </section>
+    ))}
+  </main>
+
+  <footer class="site-footer">
+    <span>{selectedYear.year}</span>
+    <span>END OF VOLUME</span>
+  </footer>
+</BaseLayout>
+

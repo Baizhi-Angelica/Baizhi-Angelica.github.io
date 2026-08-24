@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1350" viewBox="0 0 900 1350" role="img" aria-labelledby="title desc">
+  <title id="title">示例竖幅照片占位图</title>
+  <desc id="desc">室内光影的抽象色块，仅用于展示版面。</desc>
+  <rect width="900" height="1350" fill="#beb6aa"/>
+  <path d="M580 0h320v1350H215Z" fill="#e2d6c3"/>
+  <path d="M0 845 900 470v880H0Z" fill="#736d66" opacity=".52"/>
+  <text x="56" y="78" fill="#4b4641" font-family="system-ui,sans-serif" font-size="22" letter-spacing="4">EXAMPLE PHOTOGRAPH</text>
+</svg>
+

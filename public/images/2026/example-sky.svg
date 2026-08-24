@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="940" viewBox="0 0 1500 940" role="img" aria-labelledby="title desc">
+  <title id="title">示例横幅照片占位图</title>
+  <desc id="desc">天空与地平线的抽象色块，仅用于展示版面。</desc>
+  <rect width="1500" height="940" fill="#aebdc3"/>
+  <path d="M0 690c230-90 390 30 590-25s390-45 515 8 225-30 395-35v302H0Z" fill="#4f5958"/>
+  <circle cx="1180" cy="235" r="74" fill="#d9d4c8" opacity=".86"/>
+  <text x="66" y="84" fill="#354246" font-family="system-ui,sans-serif" font-size="26" letter-spacing="5">EXAMPLE PHOTOGRAPH</text>
+</svg>
+

@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { loadJournal } from '../lib/journal';
+
+const journal = await loadJournal();
+const destination = `/${journal.latestYear}/`;
+---
+
+<BaseLayout
+  title="Angelica's Photographic Journal"
+  description="一本不断向下延伸的个人摄影时间日志。"
+  canonicalPath={destination}
+  redirectTo={destination}
+>
+  <main id="main-content" class="redirect-page">
+    <p>正在打开最新的摄影日志。</p>
+    <a href={destination}>进入 {journal.latestYear} 年</a>
+  </main>
+</BaseLayout>
