@@ -1,0 +1,38 @@
+Photographic Journal - Computer Requirements
+=============================================
+
+Required software
+-----------------
+
+1. Windows 10 or Windows 11
+2. Git for Windows
+   https://git-scm.com/download/win
+3. Node.js 22.12 or newer
+   https://nodejs.org/
+4. A GitHub account with permission to push to:
+   https://github.com/Baizhi-Angelica/Baizhi-Angelica.github.io
+
+No separate Python, ImageMagick, FFmpeg, database, or image editor is required.
+The project dependencies and the Sharp image converter are recorded in
+package.json and package-lock.json. On a new computer, 02_COMMIT_AND_PUSH.bat
+automatically runs "npm ci" when those local dependencies are missing.
+
+First-time setup
+----------------
+
+Open Command Prompt and run:
+
+git clone https://github.com/Baizhi-Angelica/Baizhi-Angelica.github.io.git
+cd Baizhi-Angelica.github.io
+
+Then use these files in order for every journal update:
+
+1. 01_SYNC_BEFORE_WRITING.bat
+2. Add photos and edit content\YYYY.md
+3. 02_COMMIT_AND_PUSH.bat
+
+Local original-photo archive
+----------------------------
+
+.photos-src\ is intentionally excluded from Git. Original photos stored there
+remain only on the computer that processed them and are never uploaded.

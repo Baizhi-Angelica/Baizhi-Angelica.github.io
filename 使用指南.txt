@@ -1,0 +1,56 @@
+摄影日志使用指南
+================
+
+一、新电脑第一次使用
+
+1. 安装 Git for Windows 和 Node.js 22，具体要求见 REQUIREMENTS.txt。
+2. 打开命令提示符，运行：
+
+   git clone https://github.com/Baizhi-Angelica/Baizhi-Angelica.github.io.git
+
+3. 打开克隆得到的 Baizhi-Angelica.github.io 文件夹。
+4. 以后按照下面的每周流程操作即可。
+
+
+二、每周发布
+
+1. 写之前双击 01_SYNC_BEFORE_WRITING.bat，同步 GitHub 上的最新内容。
+2. 把 JPG、JPEG 或 PNG 原图放进：
+
+   public\images\年份\
+
+   例如：public\images\2026\sunset.JPG
+
+3. 打开对应年份的 Markdown：
+
+   content\2026.md
+
+4. 按文件顶部注释中的规范新增日志。每篇最多两张照片，Markdown 中直接填写原图文件名，例如：
+
+   ## 2026-08-30
+
+   ![照片说明](/images/2026/sunset.JPG)
+
+   第一段导语。
+
+   后续正文。
+
+5. 写完后双击 02_COMMIT_AND_PUSH.bat。
+
+02 会自动完成：
+
+- 把新原图转换为同名 WebP；
+- 保证大图转换后不低于 2 MB；
+- 自动修改 Markdown 中的图片扩展名；
+- 把原图移到本机 .photos-src\年份\ 备份目录；
+- Commit 并 push 到 GitHub；
+- 触发 GitHub Actions 更新网站。
+
+
+三、重要说明
+
+- .photos-src 中的原图不会上传 GitHub，也不会同步到另一台电脑。
+- 它只是发布过程中的本地留存，重要相机原片仍请另行备份。
+- 在另一台电脑开始写之前，一定先双击 01，避免覆盖 GitHub 上的新内容。
+- 01 和 02 都会先尝试直接连接 GitHub；直接连接失败时才尝试本机 127.0.0.1:7890 代理。
+- 第一次 push 时，Git for Windows 可能会打开浏览器要求登录 GitHub，按提示登录即可。
