@@ -16,4 +16,4 @@
 
 
 友情链接：
-[hitorino](hitorino.tv)
+[hitorino](https://hitorino.tv)
