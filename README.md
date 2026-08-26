@@ -38,3 +38,33 @@ npm run dev
 完整检查：`npm run check && npm test && npm run build`。
 
 单独执行照片处理：`npm run photos`。通常无需手动运行，双击 `02_COMMIT_AND_PUSH.bat` 即会自动执行。
+
+## License / 授权
+
+本仓库的源码与摄影内容分别采用不同许可证：
+
+- **网站源码**：MIT License，详见 [`LICENSE`](./LICENSE)。
+- **摄影作品及原创日志文字**：Creative Commons
+  Attribution-NonCommercial-ShareAlike 4.0 International
+  （**CC BY-NC-SA 4.0**），详见
+  [`LICENSE-CONTENT.md`](./LICENSE-CONTENT.md)。
+
+除非另有说明，`public/images/` 中的原创摄影作品以及 `content/`
+中的原创日志内容均适用 CC BY-NC-SA 4.0。
+
+第三方素材仍按照其各自的版权及许可条款使用。
+
+```
+MIT
+├── src/**
+├── scripts/**
+├── astro.config.mjs
+├── package.json
+├── package-lock.json
+├── *.bat
+└── .github/workflows/**
+
+CC BY-NC-SA 4.0
+├── public/images/**
+└── content/**
+```

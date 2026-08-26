@@ -20,8 +20,8 @@ call npm.cmd run photos
 if errorlevel 1 goto failure
 echo.
 
-echo Selecting changes under content and public/images...
-git add -- content public/images
+echo Selecting all local website changes...
+git add --all
 if errorlevel 1 goto failure
 
 git diff --cached --quiet
