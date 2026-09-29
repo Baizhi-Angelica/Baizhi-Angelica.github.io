@@ -12,8 +12,8 @@
 
 本网站是部署在Github Pages上面的静态网页，只能通过我自己commit来进行更新。 感谢GitHub/ ChatGPT/ 某蓝色大肥鱼/ 小米mimo的贡献。因为我并不会代码，它们帮我完成了这个我自己心心念念的，属于我自己的QQ空间。
 
-但是好像GitHub对上传图片有大小限制（汗），这个嘛，再说吧，慢慢解决
+但是好像GitHub对上传图片有大小限制（汗），这个嘛，再说吧，慢慢解决。目前的办法是每张图片压缩Webp然后上传，大约每张2MB，上限目前是1GB够用。
 
 
 友情链接：
-[hitorino](https://hitorino.tv)
+[hitorino](https://hitorino.tv), [白音的小屋](https://shirone.moe)
