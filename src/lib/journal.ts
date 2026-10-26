@@ -212,10 +212,93 @@ async function renderNodes(nodes: RootContent[]): Promise<string> {
   return processor.stringify(hast);
 }
 
-function readImageDimensions(data: Uint8Array): { width: number; height: number } | undefined {
+function asciiAt(data: Uint8Array, start: number, length: number): string {
+  return new TextDecoder('ascii').decode(data.subarray(start, start + length));
+}
+
+const HEIF_BRANDS = new Set(['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'mif1', 'msf1']);
+
+interface IsoBox {
+  type: string;
+  contentStart: number;
+  end: number;
+}
+
+function readIsoBoxes(view: DataView, data: Uint8Array, start: number, end: number): IsoBox[] {
+  const boxes: IsoBox[] = [];
+  let offset = start;
+
+  while (offset + 8 <= end) {
+    let size = view.getUint32(offset);
+    let headerSize = 8;
+
+    if (size === 1) {
+      if (offset + 16 > end) break;
+      size = Number(view.getBigUint64(offset + 8));
+      headerSize = 16;
+    } else if (size === 0) {
+      size = end - offset;
+    }
+
+    if (size < headerSize || offset + size > end) break;
+
+    boxes.push({
+      type: asciiAt(data, offset + 4, 4),
+      contentStart: offset + headerSize,
+      end: offset + size
+    });
+    offset += size;
+  }
+
+  return boxes;
+}
+
+/**
+ * HEIC/HEIF keeps the HDR original untouched, so its pixels are never decoded here.
+ * The display size comes from the `ispe` properties inside `meta/iprp/ipco`.
+ */
+function readHeifDimensions(data: Uint8Array): { width: number; height: number } | undefined {
+  if (data.length < 12) return undefined;
+  if (asciiAt(data, 4, 4) !== 'ftyp' || !HEIF_BRANDS.has(asciiAt(data, 8, 4))) return undefined;
+
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
-  const ascii = (start: number, length: number) =>
-    new TextDecoder('ascii').decode(data.subarray(start, start + length));
+  const meta = readIsoBoxes(view, data, 0, data.length).find((box) => box.type === 'meta');
+  if (!meta) return undefined;
+
+  // `meta` is a full box: its children start after the 4-byte version/flags.
+  const iprp = readIsoBoxes(view, data, meta.contentStart + 4, meta.end).find(
+    (box) => box.type === 'iprp'
+  );
+  if (!iprp) return undefined;
+  const ipco = readIsoBoxes(view, data, iprp.contentStart, iprp.end).find(
+    (box) => box.type === 'ipco'
+  );
+  if (!ipco) return undefined;
+
+  const properties = readIsoBoxes(view, data, ipco.contentStart, ipco.end);
+  let largest: { width: number; height: number } | undefined;
+
+  for (const property of properties) {
+    if (property.type !== 'ispe' || property.contentStart + 12 > property.end) continue;
+    const width = view.getUint32(property.contentStart + 4);
+    const height = view.getUint32(property.contentStart + 8);
+    if (width === 0 || height === 0) continue;
+    // The primary image is the largest `ispe`; thumbnails and auxiliary images are smaller.
+    if (!largest || width * height > largest.width * largest.height) largest = { width, height };
+  }
+
+  if (!largest) return undefined;
+
+  const rotation = properties.find((property) => property.type === 'irot');
+  const angle =
+    rotation && rotation.contentStart < rotation.end ? data[rotation.contentStart] & 0x03 : 0;
+  // `irot` counts 90° steps counter-clockwise, so odd values swap the stored axes.
+  return angle % 2 === 1 ? { width: largest.height, height: largest.width } : largest;
+}
+
+export function readImageDimensions(data: Uint8Array): { width: number; height: number } | undefined {
+  const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  const ascii = (start: number, length: number) => asciiAt(data, start, length);
 
   if (data.length >= 24 && ascii(1, 3) === 'PNG') {
     return { width: view.getUint32(16), height: view.getUint32(20) };
@@ -267,6 +350,9 @@ function readImageDimensions(data: Uint8Array): { width: number; height: number 
       offset += segmentLength;
     }
   }
+
+  const heif = readHeifDimensions(data);
+  if (heif) return heif;
 
   const prefix = new TextDecoder('utf8').decode(data.subarray(0, Math.min(data.length, 8192)));
   if (/^\s*<svg\b/i.test(prefix) || /<svg\b/i.test(prefix)) {

@@ -7,7 +7,9 @@ const MASTER_LONG_EDGE = 3200;
 const WEBP_QUALITY = 88;
 const MIN_WEB_BYTES = 2 * 1024 * 1024;
 const SOURCE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png']);
-const UNSUPPORTED_CAMERA_EXTENSIONS = new Set(['.bmp', '.gif', '.heic', '.heif', '.tif', '.tiff']);
+// HEIC/HEIF photos are published as-is: re-encoding to WebP would drop the HDR gain map.
+const PASSTHROUGH_EXTENSIONS = new Set(['.heic', '.heif']);
+const UNSUPPORTED_CAMERA_EXTENSIONS = new Set(['.bmp', '.gif', '.tif', '.tiff']);
 
 function formatBytes(bytes) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -87,9 +89,12 @@ export async function optimizePhotos(rootDirectory = process.cwd(), options = {}
   const sources = imageFiles.filter((filePath) =>
     SOURCE_EXTENSIONS.has(path.extname(filePath).toLowerCase())
   );
-  if (sources.length === 0) {
-    log('No new JPG or PNG photos to optimize.');
-    return { processed: [] };
+  const passthrough = imageFiles.filter((filePath) =>
+    PASSTHROUGH_EXTENSIONS.has(path.extname(filePath).toLowerCase())
+  );
+  if (sources.length === 0 && passthrough.length === 0) {
+    log('No new JPG, PNG or HEIC photos to optimize.');
+    return { processed: [], passthrough: [] };
   }
 
   const markdownFiles = (await readdir(contentDirectory))
@@ -100,6 +105,25 @@ export async function optimizePhotos(rootDirectory = process.cwd(), options = {}
       markdownFiles.map(async (filePath) => [filePath, await readFile(filePath, 'utf8')])
     )
   );
+
+  const passthroughPhotos = [];
+  for (const inputPath of passthrough) {
+    const publicPath = path.relative(imagesDirectory, inputPath).replaceAll('\\', '/');
+    const url = `/images/${publicPath}`;
+    const referencedBy = [...markdown.entries()]
+      .filter(([, source]) => source.includes(url))
+      .map(([filePath]) => filePath);
+
+    if (referencedBy.length === 0) {
+      throw new Error(`HEIC photo is not referenced by any content Markdown file: ${publicPath}`);
+    }
+    passthroughPhotos.push({
+      publicPath,
+      url,
+      bytes: (await stat(inputPath)).size,
+      referencedBy
+    });
+  }
 
   const jobs = [];
   for (const inputPath of sources) {
@@ -197,8 +221,15 @@ export async function optimizePhotos(rootDirectory = process.cwd(), options = {}
     await writeFile(markdownPath, source, 'utf8');
   }
 
+  for (const photo of passthroughPhotos) {
+    log(
+      `Keeping ${photo.publicPath} as-is (HEIC/HEIF, ${formatBytes(photo.bytes)}); ` +
+      'no WebP conversion, the HDR original is published unchanged.'
+    );
+  }
+
   log(`Photo optimization complete: ${processed.length} photo(s) converted to WebP.`);
-  return { processed };
+  return { processed, passthrough: passthroughPhotos };
 }
 
 const invokedPath = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : '';

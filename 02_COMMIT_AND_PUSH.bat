@@ -15,7 +15,7 @@ if not exist "node_modules\sharp\package.json" (
   if errorlevel 1 goto failure
 )
 
-echo Optimizing new JPG and PNG photos...
+echo Optimizing new JPG and PNG photos (HEIC is published as-is)...
 call npm.cmd run photos
 if errorlevel 1 goto failure
 echo.
