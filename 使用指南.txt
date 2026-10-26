@@ -15,7 +15,7 @@
 二、每周发布
 
 1. 写之前双击 01_SYNC_BEFORE_WRITING.bat，同步 GitHub 上的最新内容。
-2. 把 JPG、JPEG 或 PNG 原图放进：
+2. 把 JPG、JPEG、PNG 或 HEIC 原图放进：
 
    public\images\年份\
 
@@ -43,6 +43,7 @@
 - 保证大图转换后不低于 2 MB；
 - 自动修改 Markdown 中的图片扩展名；
 - 把原图移到本机 .photos-src\年份\ 备份目录；
+- HEIC / HEIF 原图不做以上任何转换，直接原样上传（保留 HDR）；
 - Commit 并 push 到 GitHub；
 - 触发 GitHub Actions 更新网站。
 
@@ -51,6 +52,7 @@
 
 - .photos-src 中的原图不会上传 GitHub，也不会同步到另一台电脑。
 - 它只是发布过程中的本地留存，重要相机原片仍请另行备份。
+- HEIC 原图不经过压缩，Git 和网站上保存的就是原文件；能不能显示取决于查看设备，Safari / iPhone 原生支持，桌面版 Chrome 可能显示不出来。
 - 在另一台电脑开始写之前，一定先双击 01，避免覆盖 GitHub 上的新内容。
 - 01 和 02 都会先尝试直接连接 GitHub；直接连接失败时才尝试本机 127.0.0.1:7890 代理。
 - 第一次 push 时，Git for Windows 可能会打开浏览器要求登录 GitHub，按提示登录即可。

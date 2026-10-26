@@ -75,4 +75,47 @@ describe('photo optimizer', () => {
     await expect(optimizePhotos(root, { log: () => {} })).rejects.toThrow('not referenced');
     expect(await stat(imagePath)).toBeTruthy();
   });
+
+  it('publishes HEIC photos untouched and leaves the Markdown path alone', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'journal-photo-'));
+    temporaryDirectories.push(root);
+    const imageDirectory = path.join(root, 'public', 'images', '2026');
+    const contentDirectory = path.join(root, 'content');
+    await mkdir(imageDirectory, { recursive: true });
+    await mkdir(contentDirectory, { recursive: true });
+
+    const imagePath = path.join(imageDirectory, 'IMG_0001.HEIC');
+    // HEIC must never be decoded here, so opaque bytes are enough to prove passthrough.
+    const payload = Buffer.from('heic-passthrough-payload');
+    await writeFile(imagePath, payload);
+    const markdownPath = path.join(contentDirectory, '2026.md');
+    const markdown = '## 2026-08-30\n\n![heic](/images/2026/IMG_0001.HEIC)\n\nText.\n';
+    await writeFile(markdownPath, markdown, 'utf8');
+
+    const result = await optimizePhotos(root, { log: () => {} });
+    expect(result.processed).toHaveLength(0);
+    expect(result.passthrough).toHaveLength(1);
+    expect(await readFile(imagePath)).toEqual(payload);
+    await expect(stat(path.join(imageDirectory, 'IMG_0001.webp'))).rejects.toThrow();
+    await expect(stat(path.join(root, '.photos-src', '2026', 'IMG_0001.HEIC'))).rejects.toThrow();
+    expect(await readFile(markdownPath, 'utf8')).toBe(markdown);
+
+    const second = await optimizePhotos(root, { log: () => {} });
+    expect(second.processed).toHaveLength(0);
+  });
+
+  it('still blocks a HEIC photo that no journal entry references', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'journal-photo-'));
+    temporaryDirectories.push(root);
+    const imageDirectory = path.join(root, 'public', 'images', '2026');
+    const contentDirectory = path.join(root, 'content');
+    await mkdir(imageDirectory, { recursive: true });
+    await mkdir(contentDirectory, { recursive: true });
+    const imagePath = path.join(imageDirectory, 'orphan.HEIC');
+    await writeFile(imagePath, Buffer.from('heic-passthrough-payload'));
+    await writeFile(path.join(contentDirectory, '2026.md'), '# 2026\n', 'utf8');
+
+    await expect(optimizePhotos(root, { log: () => {} })).rejects.toThrow('not referenced');
+    expect(await stat(imagePath)).toBeTruthy();
+  });
 });

@@ -1,5 +1,42 @@
 import { describe, expect, it } from 'vitest';
-import { parseYearSource } from './journal';
+import { parseYearSource, readImageDimensions } from './journal';
+
+function asciiBytes(text: string): Uint8Array {
+  const bytes = new Uint8Array(text.length);
+  for (let index = 0; index < text.length; index += 1) bytes[index] = text.charCodeAt(index);
+  return bytes;
+}
+
+function isoBox(type: string, ...payload: Uint8Array[]): Uint8Array {
+  const bodyLength = payload.reduce((total, part) => total + part.length, 0);
+  const box = new Uint8Array(bodyLength + 8);
+  new DataView(box.buffer).setUint32(0, box.length);
+  box.set(asciiBytes(type), 4);
+  let offset = 8;
+  for (const part of payload) {
+    box.set(part, offset);
+    offset += part.length;
+  }
+  return box;
+}
+
+function ispe(width: number, height: number): Uint8Array {
+  // ispe is a full box: 4 bytes of version/flags, then width and height.
+  const payload = new Uint8Array(12);
+  const view = new DataView(payload.buffer);
+  view.setUint32(4, width);
+  view.setUint32(8, height);
+  return isoBox('ispe', payload);
+}
+
+function heicFile(properties: Uint8Array[]): Uint8Array {
+  const ftyp = isoBox('ftyp', asciiBytes('heic'), new Uint8Array(4), asciiBytes('mif1'));
+  const meta = isoBox('meta', new Uint8Array(4), isoBox('iprp', isoBox('ipco', ...properties)));
+  const file = new Uint8Array(ftyp.length + meta.length);
+  file.set(ftyp, 0);
+  file.set(meta, ftyp.length);
+  return file;
+}
 
 describe('year journal parser', () => {
   it('uses AST headings as boundaries and keeps ordinary Markdown intact', () => {
@@ -41,5 +78,24 @@ describe('year journal parser', () => {
         2026
       )
     ).toThrow('必须紧跟日期标题');
+  });
+});
+
+describe('image dimension reader', () => {
+  it('reads the primary HEIC size instead of the embedded thumbnail', () => {
+    const photo = heicFile([ispe(320, 213), ispe(4032, 3024)]);
+    expect(readImageDimensions(photo)).toEqual({ width: 4032, height: 3024 });
+  });
+
+  it('swaps HEIC axes when irot requests a quarter turn', () => {
+    const rotated = heicFile([ispe(4032, 3024), isoBox('irot', new Uint8Array([1]))]);
+    expect(readImageDimensions(rotated)).toEqual({ width: 3024, height: 4032 });
+
+    const unrotated = heicFile([ispe(4032, 3024), isoBox('irot', new Uint8Array([0]))]);
+    expect(readImageDimensions(unrotated)).toEqual({ width: 4032, height: 3024 });
+  });
+
+  it('ignores data that is not a HEIC container', () => {
+    expect(readImageDimensions(new Uint8Array(32))).toBeUndefined();
   });
 });

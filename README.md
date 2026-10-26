@@ -4,7 +4,7 @@
 
 ## 发布一篇日志
 
-1. 把 JPG、JPEG 或 PNG 原图放进 `public/images/年份/`，例如 `public/images/2026/sunset.JPG`。
+1. 把 JPG、JPEG、PNG 或 HEIC 原图放进 `public/images/年份/`，例如 `public/images/2026/sunset.JPG`。
 2. 打开对应年份文件，例如 `content/2026.md`。
 3. 新增以下内容（写在文件任何位置都可以，网站会自动按日期倒序）：
 
@@ -23,6 +23,8 @@
 两张照片时，把两行图片连续写在日期后。新的一年只需新建 `content/2027.md`；年份和月份菜单会自动更新。
 
 照片发布时会保持主文件名不变，例如 `sunset.JPG` 会生成 `sunset.webp`，Markdown 中的路径也会自动改成 `.webp`。转换后的大图不会低于 2 MB；如果缩小版本低于这个下限，程序会自动保留更高分辨率或更高质量。原图会移动到本地 `.photos-src/年份/` 目录，网站和 Git 只保存 WebP。`.photos-src` 不会上传 GitHub，请把相机原片另外做好正式备份。
+
+HEIC / HEIF（含 `.HEIC` 大写）是例外：原图不做任何转换，也不移动到 `.photos-src`，`public/images/年份/` 里的文件直接原样上传并发布，因此 HDR 信息和完整像素都保留。Markdown 里照写原文件名即可（例如 `/images/2026/IMG_1234.HEIC`），不要手改扩展名。
 
 构建会阻止非法日期、重复日期、年份不匹配和空日志。没有照片时会给出 warning，但文字仍可正常发布。
 
