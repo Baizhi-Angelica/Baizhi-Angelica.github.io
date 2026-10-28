@@ -16,4 +16,4 @@
 
 
 友情链接：
-[hitorino](https://hitorino.tv), [白音的小屋](https://shirone.moe)
+[hitorino](https://hitorino.tv), [白音的小屋](https://shirone.moe), [CappuccinoZ](https://kitakita.top)
